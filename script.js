@@ -1,25 +1,24 @@
+// 1. انتخاب المنت‌ها
 const addTaskBtn = document.getElementById('add-task');
 const taskInput = document.getElementById('task-input');
 const taskList = document.getElementById('task-list');
 
-function addTask() {
-    const taskText = taskInput.value;
+const showAllBtn = document.getElementById('show-all');
+const showCompletedBtn = document.getElementById('show-completed');
+const showPendingBtn = document.getElementById('show-pending');
 
-    if (taskText === '') {
-        return;
-    }
+function addTask(taskText, completed = false) {
+    if (!taskText) return;
 
     const li = document.createElement('li');
 
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
+    checkbox.checked = completed;
 
     checkbox.addEventListener('change', () => {
-        if (li.classList.contains('completed')) {
-            li.classList.remove('completed');
-        } else {
-            li.classList.add('completed');
-        }
+        li.classList.toggle('completed');
+        saveTasks();
     });
 
     const span = document.createElement('span');
@@ -27,71 +26,88 @@ function addTask() {
 
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = 'حذف';
-
     deleteBtn.addEventListener('click', () => {
         li.remove();
+        saveTasks();
     });
 
-    const editbtn = document.createElement('button');
-    editbtn.textContent = 'ویرایش';
-
-    editbtn.addEventListener('click', () => {
+    const editBtn = document.createElement('button');
+    editBtn.textContent = 'ویرایش';
+    editBtn.addEventListener('click', () => {
         const input = document.createElement('input');
-        input.type = 'Text';
+        input.type = 'text';
         input.value = span.textContent;
-        li.removeChild(span);
-        li.appendChild(input);
 
-        const savebtn = document.createElement('button');
-        savebtn.textContent = "ثبت";
-        savebtn.addEventListener('click', () => {
+        li.replaceChild(input, span);
+
+        const saveBtn = document.createElement('button');
+        saveBtn.textContent = 'ثبت';
+
+        saveBtn.addEventListener('click', () => {
             span.textContent = input.value || span.textContent;
             li.replaceChild(span, input);
-            li.removeChild(savebtn);
+            li.removeChild(saveBtn);
+            saveTasks();
         });
-        li.appendChild(savebtn);
+
+        li.appendChild(saveBtn);
     });
+
+    if (completed) li.classList.add('completed');
 
     li.appendChild(checkbox);
     li.appendChild(span);
-
-    taskList.appendChild(li);
-    li.appendChild(editbtn);
+    li.appendChild(editBtn);
     li.appendChild(deleteBtn);
 
-    taskInput.value = '';
+    taskList.appendChild(li);
 }
 
-addTaskBtn.addEventListener('click', addTask);
+addTaskBtn.addEventListener('click', () => {
+    const taskText = taskInput.value.trim();
+    addTask(taskText);
+    saveTasks();
+    taskInput.value = '';
+});
 
-taskInput.addEventListener('keydown', (Event) => {
-    if (Event.key === 'Enter') {
-        addTask();
+taskInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        const taskText = taskInput.value.trim();
+        addTask(taskText);
+        saveTasks();
+        taskInput.value = '';
     }
 });
 
-document.getElementById('show-all').addEventListener('click', () => {
+showAllBtn.addEventListener('click', () => {
+    document.querySelectorAll('#task-list li').forEach(li => li.style.display = 'flex');
+});
+
+showCompletedBtn.addEventListener('click', () => {
     document.querySelectorAll('#task-list li').forEach(li => {
-        li.style.display = 'block';
+        li.style.display = li.classList.contains('completed') ? 'flex' : 'none';
     });
 });
 
-document.getElementById('show-completed').addEventListener('click', () => {
+showPendingBtn.addEventListener('click', () => {
     document.querySelectorAll('#task-list li').forEach(li => {
-        if (li.classList.contains('completed')) {
-            li.style.display = 'block';
-        } else {
-            li.style.display = 'none';
-        }
+        li.style.display = li.classList.contains('completed') ? 'none' : 'flex';
     });
 });
 
-document.getElementById('show-pending').addEventListener('click', () => {
+function saveTasks() {
+    const tasks = [];
     document.querySelectorAll('#task-list li').forEach(li => {
-        if (!li.classList.contains('completed')) {
-            li.style.display = 'block';
-        } else {
-            li.style.display = 'none';
-        }
+        const text = li.querySelector('span').textContent;
+        const completed = li.classList.contains('completed');
+        tasks.push({ text, completed });
     });
-});
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+function loadTasks() {
+    const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    savedTasks.forEach(task => addTask(task.text, task.completed));
+}
+
+document.addEventListener('DOMContentLoaded', loadTasks);
