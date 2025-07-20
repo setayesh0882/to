@@ -15,60 +15,48 @@ function addTask() {
     checkbox.type = 'checkbox';
 
     checkbox.addEventListener('change', () => {
-        if(li.classList.contains('completed')){
-        li.classList.remove('completed');
-            
-        }
-
-        else{
-        li.classList.add('completed');
-            
+        if (li.classList.contains('completed')) {
+            li.classList.remove('completed');
+        } else {
+            li.classList.add('completed');
         }
     });
 
     const span = document.createElement('span');
     span.textContent = taskText;
 
-    const deleteBtn=document.createElement('button');
-      deleteBtn.textContent = 'حذف';
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'حذف';
 
-    deleteBtn.addEventListener('click' , ()=>{
+    deleteBtn.addEventListener('click', () => {
         li.remove();
     });
 
     const editbtn = document.createElement('button');
-    editbtn.textContent='ویرایش';
+    editbtn.textContent = 'ویرایش';
 
-    editbtn.addEventListener('click',()=>{
-        const input=document.createElement('input');
-        input.type='Text';
-        input.value=span.textContent;
+    editbtn.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'Text';
+        input.value = span.textContent;
         li.removeChild(span);
         li.appendChild(input);
 
-        const edit =()=>{
-            span.textContent = input.textContent || span.textContent;
-            li.replaceChild (span , input);
-        }
-
         const savebtn = document.createElement('button');
         savebtn.textContent = "ثبت";
-        savebtn.addEventListener('click', ()=>{
-            span.textContent=input.value || span.textContent;
-            li.replaceChild(span,input);
+        savebtn.addEventListener('click', () => {
+            span.textContent = input.value || span.textContent;
+            li.replaceChild(span, input);
             li.removeChild(savebtn);
-
-        })
-                li.appendChild(savebtn);
-
-        })
+        });
+        li.appendChild(savebtn);
+    });
 
     li.appendChild(checkbox);
     li.appendChild(span);
 
     taskList.appendChild(li);
     li.appendChild(editbtn);
-
     li.appendChild(deleteBtn);
 
     taskInput.value = '';
@@ -76,8 +64,34 @@ function addTask() {
 
 addTaskBtn.addEventListener('click', addTask);
 
-taskInput.addEventListener('keydown' , (Event)=>{
-    if (Event.key==='Enter'){
+taskInput.addEventListener('keydown', (Event) => {
+    if (Event.key === 'Enter') {
         addTask();
     }
+});
+
+document.getElementById('show-all').addEventListener('click', () => {
+    document.querySelectorAll('#task-list li').forEach(li => {
+        li.style.display = 'block';
+    });
+});
+
+document.getElementById('show-completed').addEventListener('click', () => {
+    document.querySelectorAll('#task-list li').forEach(li => {
+        if (li.classList.contains('completed')) {
+            li.style.display = 'block';
+        } else {
+            li.style.display = 'none';
+        }
+    });
+});
+
+document.getElementById('show-pending').addEventListener('click', () => {
+    document.querySelectorAll('#task-list li').forEach(li => {
+        if (!li.classList.contains('completed')) {
+            li.style.display = 'block';
+        } else {
+            li.style.display = 'none';
+        }
+    });
 });
